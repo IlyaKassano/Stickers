@@ -78,7 +78,10 @@ namespace VkStickers
             public RECT rectCaret;
         }
 
-
+        [System.Runtime.InteropServices.Guid("618736E0-3C3D-11CF-810C-00AA00389B71")]
+        public interface IAccessible {
+            public void accLocation(out int pxLeft, out int pyTop, out int pcxWidth, out int pcyHeight, object varChild);
+        }
 
         [DllImport("oleacc.dll")]
         public static extern int AccessibleObjectFromWindow(IntPtr hwnd, uint id, ref Guid iid, [In, Out, MarshalAs(UnmanagedType.IUnknown)] ref object ppvObject);
@@ -92,20 +95,29 @@ namespace VkStickers
             Debug.WriteLine(GetCaretPos(out point));
             Debug.WriteLine("{0}, {1}", point.X, point.Y);
 
-            var fw = GetForegroundWindow();
+            var fw = GetForegroundWindow(); 
             var guiInfo = new GUITHREADINFO();
             guiInfo.cbSize = Marshal.SizeOf(guiInfo);
             //var threadId = GetWindowThreadProcessId((int)fw, out int procId); 
             GetGUIThreadInfo(0, ref guiInfo);
             Debug.WriteLine(new Win32Exception(Marshal.GetLastWin32Error()));
              
+
             Guid guid = new Guid("{618736E0-3C3D-11CF-810C-00AA00389B71}");
             dynamic o = new object();
             var obj = AccessibleObjectFromWindow(guiInfo.hwndFocus, OBJID_CARET, ref guid, ref o);
-            var test = o.accLocation();
+            var t = o as IAccessible;
+            var varChild = new object();
+            Thread thread = new Thread(() =>
+            {
+                o.accLocation(out int pxLeft, out int pyTop, out int pcxWidth, out int pcyHeight, 0);
+                Debug.WriteLine("{0}, {1}, {2}, {3}", pxLeft, pyTop, pcxWidth, pcyHeight); 
+                ;
+            });
+            thread.Start();
 
 
-            if (e.KeyboardData.VirtualCode != 97)
+             if (e.KeyboardData.VirtualCode != 97)
                 return; 
 
             // seems, not needed in the life.
