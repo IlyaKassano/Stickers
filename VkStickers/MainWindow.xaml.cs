@@ -31,90 +31,66 @@ namespace VkStickers
     {
         static IntPtr _lastActiveWindow;
         GlobalKeyboardHook _hooker;
+        bool _show = false;
+
+        [DllImport("user32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        static extern bool PostMessage(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
+
+        const int SC_MINIMIZE = 0xF020;
+        const int SC_RESTORE = 0xF120;
+        const int WM_SYSCOMMAND = 0x0112;
 
         public MainWindow()
         {
             InitializeComponent();
 
-            _hooker = new GlobalKeyboardHook();
-            _hooker.KeyboardPressed += Hook_KeyboardPressed;
+            //_hooker = new GlobalKeyboardHook();
+            //_hooker.KeyboardPressed += Hook_KeyboardPressed;
+
+            Thread thread = new(() =>
+            {
+                while (true)
+                {
+                    var caretLocation = CaretLocator.Locate();
+                    if (caretLocation == null)
+                        continue;
+
+                    if (caretLocation.Width == 1 && !_show)
+                    {
+                        Debug.WriteLine("Show");
+                        _lastActiveWindow = GetForegroundWindow();
+                        var handle = Process.GetCurrentProcess().MainWindowHandle;
+                        PostMessage(handle, WM_SYSCOMMAND, SC_RESTORE, 0);
+                        SetForegroundWindow(handle);
+                        SetActiveWindow(_lastActiveWindow);
+
+                        _show = caretLocation.Width != 0;
+                    }
+                    if (caretLocation.Width == 0 && _show)
+                    {
+                        var handle = Process.GetCurrentProcess().MainWindowHandle;
+                        var fore = GetForegroundWindow();
+                        if (handle != fore) {
+                            Debug.WriteLine("PostMessage");
+                            PostMessage(handle, WM_SYSCOMMAND, SC_MINIMIZE, 0);
+
+                            _show = caretLocation.Width != 0;
+                        }
+                    }
+
+                    Thread.Sleep(1000);
+                }
+            });
+            thread.Start();
         }
-
-        //[DllImport("oleacc.dll", PreserveSig = false)]
-        //[return: MarshalAs(UnmanagedType.Interface)]
-        //public static extern object AccessibleObjectFromWindow(IntPtr hwnd, int dwId, ref Guid riid);
-        const uint OBJID_CARET = 0xFFFFFFF8;
-
-        [DllImport("user32.dll", SetLastError = true)]
-        public static extern bool GetGUIThreadInfo(uint hTreadID, ref GUITHREADINFO lpgui);
-
-        [DllImport("user32.dll", SetLastError = true)]
-        public static extern int GetWindowThreadProcessId(int hwnd, out int lpdwProcessId);
-
-        [DllImport("ole32.dll", SetLastError = true)]
-        public static extern int CoInitialize(IntPtr reserved);
-
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct RECT
-        {
-            public int iLeft;
-            public int iTop;
-            public int iRight;
-            public int iBottom;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct GUITHREADINFO
-        {
-            public int cbSize;
-            public int flags;
-            public IntPtr hwndActive;
-            public IntPtr hwndFocus;
-            public IntPtr hwndCapture;
-            public IntPtr hwndMenuOwner;
-            public IntPtr hwndMoveSize;
-            public IntPtr hwndCaret;
-            public RECT rectCaret;
-        }
-
-        [System.Runtime.InteropServices.Guid("618736E0-3C3D-11CF-810C-00AA00389B71")]
-        public interface IAccessible {
-            public void accLocation(out int pxLeft, out int pyTop, out int pcxWidth, out int pcyHeight, object varChild);
-        }
-
-        [DllImport("oleacc.dll")]
-        public static extern int AccessibleObjectFromWindow(IntPtr hwnd, uint id, ref Guid iid, [In, Out, MarshalAs(UnmanagedType.IUnknown)] ref object ppvObject);
-
          
         private void Hook_KeyboardPressed(object? sender, GlobalKeyboardHookEventArgs e)
         {
-            CoInitialize(0);
             Debug.WriteLine(e.KeyboardData.VirtualCode); 
             var point = new Point();
             Debug.WriteLine(GetCaretPos(out point));
             Debug.WriteLine("{0}, {1}", point.X, point.Y);
-
-            var fw = GetForegroundWindow(); 
-            var guiInfo = new GUITHREADINFO();
-            guiInfo.cbSize = Marshal.SizeOf(guiInfo);
-            //var threadId = GetWindowThreadProcessId((int)fw, out int procId); 
-            GetGUIThreadInfo(0, ref guiInfo);
-            Debug.WriteLine(new Win32Exception(Marshal.GetLastWin32Error()));
-             
-
-            Guid guid = new Guid("{618736E0-3C3D-11CF-810C-00AA00389B71}");
-            dynamic o = new object();
-            var obj = AccessibleObjectFromWindow(guiInfo.hwndFocus, OBJID_CARET, ref guid, ref o);
-            var t = o as IAccessible;
-            var varChild = new object();
-            Thread thread = new Thread(() =>
-            {
-                o.accLocation(out int pxLeft, out int pyTop, out int pcxWidth, out int pcyHeight, 0);
-                Debug.WriteLine("{0}, {1}, {2}, {3}", pxLeft, pyTop, pcxWidth, pcyHeight); 
-                ;
-            });
-            thread.Start();
 
 
              if (e.KeyboardData.VirtualCode != 97)
@@ -133,10 +109,7 @@ namespace VkStickers
             {
                 _lastActiveWindow = GetForegroundWindow();
                 var handle = Process.GetCurrentProcess().MainWindowHandle;
-                //ShowWindow(handle, ShowWindowCommands.Normal);
-                //SetFocus(handle);
                 SetForegroundWindow(handle);
-                //SetActiveWindow(handle);
                 e.Handled = true;
             }
         }
@@ -163,9 +136,6 @@ namespace VkStickers
             Directory.CreateDirectory("test");
             foreach (var img in images)
             {
-
-
-
                 StackPanel stackPnl = new StackPanel
                 {
                     Background = Brushes.Transparent,
@@ -229,7 +199,6 @@ namespace VkStickers
                 path.AbsolutePath
             };
             Clipboard.SetFileDropList(paths);
-
 
             SetForegroundWindow(_lastActiveWindow);
             SetActiveWindow(_lastActiveWindow);
