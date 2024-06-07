@@ -37,9 +37,20 @@ namespace VkStickers
         [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool PostMessage(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
 
+        [DllImport("user32.dll", EntryPoint = "SetWindowPos")]
+        public static extern IntPtr SetWindowPos(IntPtr hWnd, int hWndInsertAfter, int x, int Y, int cx, int cy, int wFlags);
+
+
         const int SC_MINIMIZE = 0xF020;
         const int SC_RESTORE = 0xF120;
         const int WM_SYSCOMMAND = 0x0112;
+        const int SWP_ASYNCWINDOWPOS = 0x4000;
+        const int SWP_NOSIZE = 0x0001;
+        const int SWP_NOMOVE = 0x0002;
+        const int SWP_NOZORDER = 0x0004;
+        const int SWP_NOACTIVATE = 0x0010;
+        const int SWP_SHOWWINDOW = 0x0040;
+        const int SWP_HIDEWINDOW = 0x0080;
 
         public MainWindow()
         {
@@ -52,34 +63,43 @@ namespace VkStickers
             {
                 while (true)
                 {
-                    var caretLocation = CaretLocator.Locate();
-                    if (caretLocation == null)
-                        continue;
-
-                    if (caretLocation.Width == 1 && !_show)
+                    lock (_locker)
                     {
-                        Debug.WriteLine("Show");
-                        _lastActiveWindow = GetForegroundWindow();
-                        var handle = Process.GetCurrentProcess().MainWindowHandle;
-                        PostMessage(handle, WM_SYSCOMMAND, SC_RESTORE, 0);
-                        SetForegroundWindow(handle);
-                        SetActiveWindow(_lastActiveWindow);
+                        var caretLocation = CaretLocator.Locate();
+                        if (caretLocation == null)
+                            continue;
 
-                        _show = caretLocation.Width != 0;
-                    }
-                    if (caretLocation.Width == 0 && _show)
-                    {
-                        var handle = Process.GetCurrentProcess().MainWindowHandle;
-                        var fore = GetForegroundWindow();
-                        if (handle != fore) {
-                            Debug.WriteLine("PostMessage");
-                            PostMessage(handle, WM_SYSCOMMAND, SC_MINIMIZE, 0);
+                        if (caretLocation.Width == 1)
+                        {
+                            Debug.WriteLine("Show");
+                            _lastActiveWindow = GetForegroundWindow();
+                            var handle = Process.GetCurrentProcess().MainWindowHandle;
+                            //PostMessage(handle, WM_SYSCOMMAND, SC_RESTORE, 0);
+                            SetWindowPos(handle, -1, caretLocation.Left + 500, caretLocation.Top - 470, 0, 0, SWP_ASYNCWINDOWPOS | SWP_NOSIZE | SWP_SHOWWINDOW);
+                            //SetForegroundWindow(handle);
+
+                            //ShowWindow(handle, ShowWindowCommands.ShowMinNoActive);
 
                             _show = caretLocation.Width != 0;
                         }
-                    }
+                        if (caretLocation.Width == 0)
+                        {
+                            var handle = Process.GetCurrentProcess().MainWindowHandle;
+                            var fore = GetForegroundWindow();
+                            if (handle != fore)
+                            {
+                                Debug.WriteLine("PostMessage");
+                                //PostMessage(handle, WM_SYSCOMMAND, SC_MINIMIZE, 0);
+                                SetWindowPos(handle, 1, 5000, 3000, 0, 0, SWP_ASYNCWINDOWPOS | SWP_NOSIZE | SWP_SHOWWINDOW);
 
-                    Thread.Sleep(1000);
+                                //ShowWindow(handle, ShowWindowCommands.Hide);
+
+                                _show = caretLocation.Width != 0;
+                            }
+                        }
+
+                        Thread.Sleep(10);
+                    }
                 }
             });
             thread.Start();
@@ -186,36 +206,40 @@ namespace VkStickers
             return bmp2;
         }*/
 
+        object _locker = new();
         private void Btn_Click(object sender, RoutedEventArgs e)
         {
-            var btn = (Button)sender;
-            var stackPnl = (StackPanel)btn.Content;
-            var img = (Image)stackPnl.Children[0];
-
-            var path = ((BitmapImage)img.Source).UriSource;
-            var bitmapImg = new BitmapImage(path);
-            var paths = new StringCollection
+            lock (_locker)
             {
-                path.AbsolutePath
-            };
-            Clipboard.SetFileDropList(paths);
+                var btn = (Button)sender;
+                var stackPnl = (StackPanel)btn.Content;
+                var img = (Image)stackPnl.Children[0];
 
-            SetForegroundWindow(_lastActiveWindow);
-            SetActiveWindow(_lastActiveWindow);
+                var path = ((BitmapImage)img.Source).UriSource;
+                var bitmapImg = new BitmapImage(path);
+                var paths = new StringCollection
+                {
+                    path.AbsolutePath
+                };
+                Clipboard.SetFileDropList(paths);
 
-            InputSimulator inputSimulator = new InputSimulator();
-            try
-            {
-                inputSimulator.Keyboard.KeyDown(VirtualKeyCode.CONTROL);
-                inputSimulator.Keyboard.KeyPress(VirtualKeyCode.VK_V);
-                inputSimulator.Keyboard.KeyUp(VirtualKeyCode.CONTROL);
-                Thread.Sleep(100);
-                inputSimulator.Keyboard.KeyPress(VirtualKeyCode.RETURN);
-            } catch (Exception ex)
-            {
-                Console.WriteLine("Алярм!: "+ex);
+                SetForegroundWindow(_lastActiveWindow);
+                SetActiveWindow(_lastActiveWindow);
+
+                InputSimulator inputSimulator = new InputSimulator();
+                try
+                {
+                    inputSimulator.Keyboard.KeyDown(VirtualKeyCode.CONTROL);
+                    inputSimulator.Keyboard.KeyPress(VirtualKeyCode.VK_V);
+                    inputSimulator.Keyboard.KeyUp(VirtualKeyCode.CONTROL);
+                    Thread.Sleep(100);
+                    inputSimulator.Keyboard.KeyPress(VirtualKeyCode.RETURN);
+                } catch (Exception ex)
+                {
+                    Console.WriteLine("Алярм!: "+ex);
+                }
+                //Clipboard.SetImage(bitmapImg);
             }
-            //Clipboard.SetImage(bitmapImg);
         }
     }
 }
