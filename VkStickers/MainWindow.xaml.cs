@@ -21,6 +21,7 @@ using System.Windows.Shapes;
 using WindowsInput;
 using WindowsInput.Native;
 using static VkStickers.WinApi;
+using Rectangle = System.Drawing.Rectangle;
 
 namespace VkStickers
 {
@@ -194,18 +195,6 @@ namespace VkStickers
             }
         }
 
-        /*Bitmap Transparent2Color(Bitmap bmp1, Color target)
-        {
-            Bitmap bmp2 = new Bitmap(bmp1.Width, bmp1.Height);
-            Rectangle rect = new Rectangle(Point.Empty, bmp1.Size);
-            using (Graphics G = Graphics.FromImage(bmp2))
-            {
-                G.Clear(target);
-                G.DrawImageUnscaledAndClipped(bmp1, rect);
-            }
-            return bmp2;
-        }*/
-
         object _locker = new();
         private void Btn_Click(object sender, RoutedEventArgs e)
         {
@@ -214,14 +203,10 @@ namespace VkStickers
                 var btn = (Button)sender;
                 var stackPnl = (StackPanel)btn.Content;
                 var img = (Image)stackPnl.Children[0];
+                var src = (BitmapSource)img.Source;
 
-                var path = ((BitmapImage)img.Source).UriSource;
-                var bitmapImg = new BitmapImage(path);
-                var paths = new StringCollection
-                {
-                    path.AbsolutePath
-                };
-                Clipboard.SetFileDropList(paths);
+                src.ReplaceTransparency(Color.FromRgb(0x1e, 0x20, 0x34));
+                Clipboard.SetImage(src);
 
                 SetForegroundWindow(_lastActiveWindow);
                 SetActiveWindow(_lastActiveWindow);
