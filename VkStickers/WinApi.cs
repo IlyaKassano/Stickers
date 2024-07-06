@@ -51,7 +51,7 @@ namespace VkStickers
         public static extern IntPtr CallNextHookEx(IntPtr hHook, int code, IntPtr wParam, IntPtr lParam);
 
         [DllImport("user32.dll")]
-        public static extern IntPtr GetWindowThreadProcessId(IntPtr hWnd, out uint ProcessId);
+        public static extern int GetWindowThreadProcessId(IntPtr hWnd, out int ProcessId);
 
         [DllImport("user32.dll")]
         public static extern IntPtr GetForegroundWindow();
@@ -70,6 +70,14 @@ namespace VkStickers
 
         [DllImport("user32.dll")]
         public static extern bool GetCaretPos(out Point lpPoint);
+        [DllImport("kernel32.dll")]
+        public static extern int GetLastError();
+
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern bool GetGUIThreadInfo(uint hTreadID, ref GUITHREADINFO lpgui);
+
+        [DllImport("oleacc.dll")]
+        public static extern int AccessibleObjectFromWindow(IntPtr hwnd, uint id, ref Guid iid, [In, Out, MarshalAs(UnmanagedType.IUnknown)] ref object ppvObject);
     }
 
 

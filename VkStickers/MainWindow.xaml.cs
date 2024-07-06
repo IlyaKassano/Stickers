@@ -30,29 +30,6 @@ namespace VkStickers
     /// </summary>
     public partial class MainWindow : Window
     {
-        static IntPtr _lastActiveWindow;
-        GlobalKeyboardHook _hooker;
-        bool _show = false;
-
-        [DllImport("user32.dll", SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        static extern bool PostMessage(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
-
-        [DllImport("user32.dll", EntryPoint = "SetWindowPos")]
-        public static extern IntPtr SetWindowPos(IntPtr hWnd, int hWndInsertAfter, int x, int Y, int cx, int cy, int wFlags);
-
-
-        const int SC_MINIMIZE = 0xF020;
-        const int SC_RESTORE = 0xF120;
-        const int WM_SYSCOMMAND = 0x0112;
-        const int SWP_ASYNCWINDOWPOS = 0x4000;
-        const int SWP_NOSIZE = 0x0001;
-        const int SWP_NOMOVE = 0x0002;
-        const int SWP_NOZORDER = 0x0004;
-        const int SWP_NOACTIVATE = 0x0010;
-        const int SWP_SHOWWINDOW = 0x0040;
-        const int SWP_HIDEWINDOW = 0x0080;
-
         public MainWindow()
         {
             InitializeComponent();
@@ -72,31 +49,11 @@ namespace VkStickers
 
                         if (caretLocation.Width == 1)
                         {
-                            Debug.WriteLine("Show");
-                            _lastActiveWindow = GetForegroundWindow();
-                            var handle = Process.GetCurrentProcess().MainWindowHandle;
-                            //PostMessage(handle, WM_SYSCOMMAND, SC_RESTORE, 0);
-                            SetWindowPos(handle, -1, caretLocation.Left + 500, caretLocation.Top - 470, 0, 0, SWP_ASYNCWINDOWPOS | SWP_NOSIZE | SWP_SHOWWINDOW);
-                            //SetForegroundWindow(handle);
-
-                            //ShowWindow(handle, ShowWindowCommands.ShowMinNoActive);
-
-                            _show = caretLocation.Width != 0;
+                            WindowManager.ShowWindow(caretLocation);
                         }
                         if (caretLocation.Width == 0)
                         {
-                            var handle = Process.GetCurrentProcess().MainWindowHandle;
-                            var fore = GetForegroundWindow();
-                            if (handle != fore)
-                            {
-                                Debug.WriteLine("PostMessage");
-                                //PostMessage(handle, WM_SYSCOMMAND, SC_MINIMIZE, 0);
-                                SetWindowPos(handle, 1, 5000, 3000, 0, 0, SWP_ASYNCWINDOWPOS | SWP_NOSIZE | SWP_SHOWWINDOW);
-
-                                //ShowWindow(handle, ShowWindowCommands.Hide);
-
-                                _show = caretLocation.Width != 0;
-                            }
+                            WindowManager.HideWindow(caretLocation);
                         }
 
                         Thread.Sleep(10);
@@ -105,17 +62,17 @@ namespace VkStickers
             });
             thread.Start();
         }
-         
-        private void Hook_KeyboardPressed(object? sender, GlobalKeyboardHookEventArgs e)
+
+        /*private void Hook_KeyboardPressed(object? sender, GlobalKeyboardHookEventArgs e)
         {
-            Debug.WriteLine(e.KeyboardData.VirtualCode); 
+            Debug.WriteLine(e.KeyboardData.VirtualCode);
             var point = new Point();
             Debug.WriteLine(GetCaretPos(out point));
             Debug.WriteLine("{0}, {1}", point.X, point.Y);
 
 
-             if (e.KeyboardData.VirtualCode != 97)
-                return; 
+            if (e.KeyboardData.VirtualCode != 97)
+                return;
 
             // seems, not needed in the life.
             //if (e.KeyboardState == GlobalKeyboardHook.KeyboardState.SysKeyDown &&
@@ -128,12 +85,12 @@ namespace VkStickers
 
             if (e.KeyboardState == KeyboardState.KeyDown)
             {
-                _lastActiveWindow = GetForegroundWindow();
+                WindowManager.LastActiveWindow = GetForegroundWindow();
                 var handle = Process.GetCurrentProcess().MainWindowHandle;
                 SetForegroundWindow(handle);
                 e.Handled = true;
             }
-        }
+        }*/
 
         private void Grid_Loaded(object sender, RoutedEventArgs e)
         {
@@ -203,13 +160,12 @@ namespace VkStickers
                 var btn = (Button)sender;
                 var stackPnl = (StackPanel)btn.Content;
                 var img = (Image)stackPnl.Children[0];
-                var src = (BitmapSource)img.Source;
 
-                src.ReplaceTransparency(Color.FromRgb(0x1e, 0x20, 0x34));
+                var src = ((BitmapSource)img.Source).ReplaceTransparency(Color.FromRgb(0x1d, 0x1f, 0x24)); // TODO Pick color
                 Clipboard.SetImage(src);
 
-                SetForegroundWindow(_lastActiveWindow);
-                SetActiveWindow(_lastActiveWindow);
+                SetForegroundWindow(WindowManager.LastActiveWindow);
+                SetActiveWindow(WindowManager.LastActiveWindow);
 
                 InputSimulator inputSimulator = new InputSimulator();
                 try
@@ -219,9 +175,10 @@ namespace VkStickers
                     inputSimulator.Keyboard.KeyUp(VirtualKeyCode.CONTROL);
                     Thread.Sleep(100);
                     inputSimulator.Keyboard.KeyPress(VirtualKeyCode.RETURN);
-                } catch (Exception ex)
+                }
+                catch (Exception ex)
                 {
-                    Console.WriteLine("Алярм!: "+ex);
+                    Console.WriteLine("Алярм!: " + ex);
                 }
                 //Clipboard.SetImage(bitmapImg);
             }
