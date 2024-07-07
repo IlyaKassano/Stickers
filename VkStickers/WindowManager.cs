@@ -21,20 +21,13 @@ namespace VkStickers
             LastActiveWindow = GetForegroundWindow();
 
             GetWindowThreadProcessId(LastActiveWindow, out int id);
-            //var err = GetLastError();
-            //Debug.WriteLine(new Win32Exception(err));
             var process = Process.GetProcessById(id);
-            //Debug.WriteLine(process.ProcessName);
             if (!_allowedProcesses.Contains(process.ProcessName))
                 return;
 
             Debug.WriteLine("Show");
             var handle = Process.GetCurrentProcess().MainWindowHandle;
-            //PostMessage(handle, WM_SYSCOMMAND, SC_RESTORE, 0);
             SetWindowPos(handle, -1, caretLocation.Left + 600, caretLocation.Top - 470, 0, 0, SWP_ASYNCWINDOWPOS | SWP_NOSIZE | SWP_SHOWWINDOW);
-            //SetForegroundWindow(handle);
-
-            //ShowWindow(handle, ShowWindowCommands.ShowMinNoActive);
 
             _show = caretLocation.Width != 0;
         }
@@ -45,11 +38,8 @@ namespace VkStickers
             var fore = GetForegroundWindow();
             if (handle != fore)
             {
-                Debug.WriteLine("PostMessage");
-                //PostMessage(handle, WM_SYSCOMMAND, SC_MINIMIZE, 0);
+                Debug.WriteLine("Hide");
                 SetWindowPos(handle, 1, 5000, 3000, 0, 0, SWP_ASYNCWINDOWPOS | SWP_NOSIZE | SWP_SHOWWINDOW);
-
-                //ShowWindow(handle, ShowWindowCommands.Hide);
 
                 _show = caretLocation.Width != 0;
             }

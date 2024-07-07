@@ -30,9 +30,15 @@ namespace VkStickers
     /// </summary>
     public partial class MainWindow : Window
     {
+        const string StickersDir = "Stickers";
+        object _locker = new object();
+        StickersLoader _stickerLoader;
+
         public MainWindow()
         {
             InitializeComponent();
+
+            _stickerLoader = new StickersLoader(Grid1);
 
             //_hooker = new GlobalKeyboardHook();
             //_hooker.KeyboardPressed += Hook_KeyboardPressed;
@@ -94,65 +100,45 @@ namespace VkStickers
 
         private void Grid_Loaded(object sender, RoutedEventArgs e)
         {
-            Grid1.SnapsToDevicePixels = true;
-            var images = new List<Image>();
-            foreach (var path in Directory.GetFiles("Stickers"))
+            this.Resources["SelectedItemBackgroundBrush"] = Brushes.Gray;
+            var tabControl = new TabControl()
             {
-                var image = new Image()
-                {
-                    Source = new BitmapImage(new Uri(System.IO.Path.GetFullPath(path))),
-                    MaxWidth = 100,
-                    MaxHeight = 100,
-                    SnapsToDevicePixels = true,
-                };
-                RenderOptions.SetBitmapScalingMode(image, BitmapScalingMode.Fant);
-                images.Add(image);
-            }
-
-            int col = 0;
-            int row = 0;
-            Directory.CreateDirectory("test");
-            foreach (var img in images)
+                BorderBrush = Brushes.Transparent,
+                Background = new SolidColorBrush(MyColors.Background),
+            };
+            /*tabControl.SelectionChanged += (sender2, args) =>
             {
-                StackPanel stackPnl = new StackPanel
+                if (args.AddedItems != null && args.AddedItems.Count > 0)
                 {
-                    Background = Brushes.Transparent,
-                    Orientation = Orientation.Horizontal,
-                    SnapsToDevicePixels = true,
-                };
-                stackPnl.Children.Add(img);
-
-                Button btn = new Button
-                {
-                    Content = stackPnl,
-                    BorderThickness = new Thickness(0),
-                    BorderBrush = Brushes.Transparent,
-                    Background = new SolidColorBrush(new Color() {
-                        B = 41,
-                        R = 41,
-                        G = 41,
-                    }),
-                    SnapsToDevicePixels = true,
-                };
-
-                Grid.SetRow(btn, row);
-                Grid.SetColumn(btn, col);
-                btn.Click += Btn_Click;
-
-                Grid1.Children.Add(btn);
-
-                if (col == Grid1.ColumnDefinitions.Count - 1)
-                {
-                    col = 0;
-                    row++;
-                    Grid1.RowDefinitions.Add(new RowDefinition() { Height = GridLength.Auto });
-                    continue;
+                    TabItem ti = args.AddedItems[0] as TabItem;
+                    if (ti != null && VisualTreeHelper.GetChildrenCount(ti) > 0)
+                    {
+                        Grid grid = VisualTreeHelper.GetChild(ti, 0) as Grid;
+                        if (grid != null)
+                        {
+                            Border mainBorder = grid.Children[0] as Border;
+                            if (mainBorder != null)
+                            {
+                                Border innerBorder = mainBorder.Child as Border;
+                                if (innerBorder != null)
+                                    innerBorder.Background = Brushes.Red;
+                            }
+                        }
+                    }
                 }
-                col++;
+            };*/
+
+            Grid1.Children.Add(tabControl);
+            Grid.SetColumn(tabControl, 0);
+            Grid.SetRow(tabControl, 0);
+
+            Grid1.SnapsToDevicePixels = true;
+            foreach (string dir in Directory.EnumerateDirectories(StickersDir))
+            {
+                _stickerLoader.LoadStickers(dir, tabControl, Btn_Click);
             }
         }
 
-        object _locker = new();
         private void Btn_Click(object sender, RoutedEventArgs e)
         {
             lock (_locker)
@@ -173,12 +159,12 @@ namespace VkStickers
                     inputSimulator.Keyboard.KeyDown(VirtualKeyCode.CONTROL);
                     inputSimulator.Keyboard.KeyPress(VirtualKeyCode.VK_V);
                     inputSimulator.Keyboard.KeyUp(VirtualKeyCode.CONTROL);
-                    Thread.Sleep(100);
+                    Thread.Sleep(200);
                     inputSimulator.Keyboard.KeyPress(VirtualKeyCode.RETURN);
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("Алярм!: " + ex);
+                    Console.WriteLine("Error during Ctrl + V, Enter: " + ex);
                 }
                 //Clipboard.SetImage(bitmapImg);
             }
