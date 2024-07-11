@@ -6,17 +6,23 @@
         xmlns:local="clr-namespace:VkStickers"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800" ResizeMode="NoResize" SizeToContent="Width" WindowStyle="None" SnapsToDevicePixels="True" Loaded="MainWindow1_Loaded">
-    <ScrollViewer VerticalScrollBarVisibility="Hidden">
-        <Grid x:Name="Grid1" Loaded="Grid_Loaded" Background="#FF414141">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <TabControl x:Name="TabControl1" Grid.Column="3" Background="#FF353535" BorderBrush="Transparent"/>
-        </Grid>
-    </ScrollViewer>
+    <DockPanel>
+        <ToolBar x:Name="ToolBar1" Grid.ColumnSpan="5" VerticalAlignment="Top" DockPanel.Dock="Top" Panel.ZIndex="1" Visibility="Collapsed">
+            <Button Content="Settings" FontSize="12" Click="OpenSettingsWindow"/>
+        </ToolBar>
+        <ScrollViewer VerticalScrollBarVisibility="Hidden">
+            <Grid x:Name="Grid1" Loaded="Grid_Loaded" Background="#FF414141">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TabControl x:Name="TabControl1" Grid.Column="3" Background="#FF353535" BorderBrush="Transparent"/>
+            </Grid>
+        </ScrollViewer>
+    </DockPanel>
+
     <Window.Resources>
         <SolidColorBrush x:Key="SelectedItemBackgroundBrush"
                      Color="Red" />

@@ -175,5 +175,32 @@ namespace VkStickers
                 //Clipboard.SetImage(bitmapImg);
             }
         }
+
+        private void MainWindow1_Loaded(object sender, RoutedEventArgs e)
+        {
+            this.KeyDown += ShowOrHideMenu;
+        }
+
+        private void ShowOrHideMenu(object sender, KeyEventArgs e)
+        {
+            if (e.Key != Key.Escape)
+                return;
+            
+            if (ToolBar1.Visibility == Visibility.Visible)
+            {
+                ToolBar1.Visibility = Visibility.Collapsed;
+                MainWindow1.WindowStyle = WindowStyle.None;
+                return;
+            }
+
+            ToolBar1.Visibility = Visibility.Visible;
+            MainWindow1.WindowStyle = WindowStyle.SingleBorderWindow;
+        }
+
+        private void OpenSettingsWindow(object sender, RoutedEventArgs e)
+        {
+            var settings = new Settings();
+            settings.Show();
+        }
     }
 }
