@@ -7,15 +7,15 @@ using System.Threading.Tasks;
 
 namespace VkStickers.General
 {
-    public class WinApi
+    internal class WinApi
     {
-        public delegate IntPtr HookProc(int nCode, IntPtr wParam, IntPtr lParam);
+        internal delegate IntPtr HookProc(int nCode, IntPtr wParam, IntPtr lParam);
 
         [DllImport("kernel32.dll")]
-        public static extern IntPtr LoadLibrary(string lpFileName);
+        internal static extern IntPtr LoadLibrary(string lpFileName);
 
         [DllImport("kernel32.dll", CharSet = CharSet.Auto)]
-        public static extern bool FreeLibrary(IntPtr hModule);
+        internal static extern bool FreeLibrary(IntPtr hModule);
 
         /// <summary>
         /// The SetWindowsHookEx function installs an application-defined hook procedure into a hook chain.
@@ -28,7 +28,7 @@ namespace VkStickers.General
         /// <param name="dwThreadId">thread identifier</param>
         /// <returns>If the function succeeds, the return value is the handle to the hook procedure.</returns>
         [DllImport("USER32", SetLastError = true)]
-        public static extern IntPtr SetWindowsHookEx(int idHook, HookProc lpfn, IntPtr hMod, int dwThreadId);
+        internal static extern IntPtr SetWindowsHookEx(int idHook, HookProc lpfn, IntPtr hMod, int dwThreadId);
 
         /// <summary>
         /// The UnhookWindowsHookEx function removes a hook procedure installed in a hook chain by the SetWindowsHookEx function.
@@ -36,7 +36,7 @@ namespace VkStickers.General
         /// <param name="hhk">handle to hook procedure</param>
         /// <returns>If the function succeeds, the return value is true.</returns>
         [DllImport("USER32", SetLastError = true)]
-        public static extern bool UnhookWindowsHookEx(IntPtr hHook);
+        internal static extern bool UnhookWindowsHookEx(IntPtr hHook);
 
         /// <summary>
         /// The CallNextHookEx function passes the hook information to the next hook procedure in the current hook chain.
@@ -48,43 +48,46 @@ namespace VkStickers.General
         /// <param name="lParam">value passed to hook procedure</param>
         /// <returns>If the function succeeds, the return value is true.</returns>
         [DllImport("USER32", SetLastError = true)]
-        public static extern IntPtr CallNextHookEx(IntPtr hHook, int code, IntPtr wParam, IntPtr lParam);
+        internal static extern IntPtr CallNextHookEx(IntPtr hHook, int code, IntPtr wParam, IntPtr lParam);
 
         [DllImport("user32.dll")]
-        public static extern int GetWindowThreadProcessId(IntPtr hWnd, out int ProcessId);
+        internal static extern int GetWindowThreadProcessId(IntPtr hWnd, out int ProcessId);
 
         [DllImport("user32.dll")]
-        public static extern IntPtr GetForegroundWindow();
+        internal static extern IntPtr GetForegroundWindow();
 
         [DllImport("user32.dll")]
-        public static extern void SwitchToThisWindow(IntPtr hWnd, bool turnon);
+        internal static extern void SwitchToThisWindow(IntPtr hWnd, bool turnon);
 
         [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        public static extern bool SetForegroundWindow(IntPtr hWnd);
+        internal static extern bool SetForegroundWindow(IntPtr hWnd);
         [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        public static extern IntPtr SetFocus(IntPtr hWnd);
+        internal static extern IntPtr SetFocus(IntPtr hWnd);
         [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        public static extern IntPtr SetActiveWindow(IntPtr hWnd);
+        internal static extern IntPtr SetActiveWindow(IntPtr hWnd);
         [DllImport("user32.dll")]
-        public static extern bool ShowWindow(IntPtr hWnd, ShowWindowCommands nCmdShow);
+        internal static extern bool ShowWindow(IntPtr hWnd, ShowWindowCommands nCmdShow);
 
         [DllImport("user32.dll")]
-        public static extern bool GetCaretPos(out Point lpPoint);
+        internal static extern bool GetCaretPos(out Point lpPoint);
         [DllImport("kernel32.dll")]
-        public static extern int GetLastError();
+        internal static extern int GetLastError();
 
         [DllImport("user32.dll", SetLastError = true)]
-        public static extern bool GetGUIThreadInfo(uint hTreadID, ref GUITHREADINFO lpgui);
+        internal static extern bool GetGUIThreadInfo(uint hTreadID, ref GUITHREADINFO lpgui);
 
         [DllImport("oleacc.dll")]
-        public static extern int AccessibleObjectFromWindow(IntPtr hwnd, uint id, ref Guid iid, [In, Out, MarshalAs(UnmanagedType.IUnknown)] ref object ppvObject);
+        internal static extern int AccessibleObjectFromWindow(IntPtr hwnd, uint id, ref Guid iid, [In, Out, MarshalAs(UnmanagedType.IUnknown)] ref object ppvObject);
+
+        [DllImport("user32.dll")]
+        internal static extern bool GetWindowRect(IntPtr hwnd, out RECT rect);
     }
 
 
 
-    public struct Point { public long X; public long Y; }
+    internal struct Point { internal long X; internal long Y; }
 
-    public enum ShowWindowCommands
+    internal enum ShowWindowCommands
     {
         /// <summary>
         /// Hides the window and activates another window.
@@ -157,35 +160,35 @@ namespace VkStickers.General
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct LowLevelKeyboardInputEvent
+    internal struct LowLevelKeyboardInputEvent
     {
         /// <summary>
         /// A virtual-key code. The code must be a value in the range 1 to 254.
         /// </summary>
-        public int VirtualCode;
+        internal int VirtualCode;
 
         /// <summary>
         /// A hardware scan code for the key. 
         /// </summary>
-        public int HardwareScanCode;
+        internal int HardwareScanCode;
 
         /// <summary>
         /// The extended-key flag, event-injected Flags, context code, and transition-state flag. This member is specified as follows. An application can use the following values to test the keystroke Flags. Testing LLKHF_INJECTED (bit 4) will tell you whether the event was injected. If it was, then testing LLKHF_LOWER_IL_INJECTED (bit 1) will tell you whether or not the event was injected from a process running at lower integrity level.
         /// </summary>
-        public int Flags;
+        internal int Flags;
 
         /// <summary>
         /// The time stamp stamp for this message, equivalent to what GetMessageTime would return for this message.
         /// </summary>
-        public int TimeStamp;
+        internal int TimeStamp;
 
         /// <summary>
         /// Additional information associated with the message. 
         /// </summary>
-        public IntPtr AdditionalInformation;
+        internal IntPtr AdditionalInformation;
     }
 
-    public enum KeyboardState
+    internal enum KeyboardState
     {
         KeyDown = 0x0100,
         KeyUp = 0x0101,
@@ -197,23 +200,23 @@ namespace VkStickers.General
     [StructLayout(LayoutKind.Sequential)]
     public struct RECT
     {
-        public int iLeft;
-        public int iTop;
-        public int iRight;
-        public int iBottom;
+        public int Left;
+        public int Top;
+        public int Right;
+        public int Bottom;
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct GUITHREADINFO
+    internal struct GUITHREADINFO
     {
-        public int cbSize;
-        public int flags;
-        public IntPtr hwndActive;
-        public IntPtr hwndFocus;
-        public IntPtr hwndCapture;
-        public IntPtr hwndMenuOwner;
-        public IntPtr hwndMoveSize;
-        public IntPtr hwndCaret;
-        public RECT rectCaret;
+        internal int cbSize;
+        internal int flags;
+        internal IntPtr hwndActive;
+        internal IntPtr hwndFocus;
+        internal IntPtr hwndCapture;
+        internal IntPtr hwndMenuOwner;
+        internal IntPtr hwndMoveSize;
+        internal IntPtr hwndCaret;
+        internal RECT rectCaret;
     }
 }

@@ -34,7 +34,7 @@ namespace VkStickers
     /// </summary>
     public partial class MainWindow : Window
     {
-        readonly Config? _config;
+        readonly Config _config;
         const string ConfigPath = "config.json";
 
         public static Color? StickerBackground = Colors.Transparent;
@@ -59,39 +59,44 @@ namespace VkStickers
             //_hooker = new GlobalKeyboardHook();
             //_hooker.KeyboardPressed += Hook_KeyboardPressed;
 
-            Thread thread = new(() =>
+            Thread thread = new(StartMonitoringCaret);
+            thread.Start();
+        }
+
+        void StartMonitoringCaret()
+        {
+            while (true)
             {
-                while (true)
+                lock (_locker)
                 {
-                    lock (_locker)
+                    CaretLocation? caretLocation = null;
+                    try
                     {
-                        CaretLocation? caretLocation = null;
-                        try
-                        {
-                            caretLocation = CaretLocator.Locate();
-                        }
-                        catch (Exception ex)
-                        {
-                            Debug.WriteLine(ex);
-                        }
+                        caretLocation = CaretLocator.Locate();
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine(ex);
+                    }
 
-                        if (caretLocation == null)
-                            continue;
+                    if (caretLocation == null)
+                        continue;
 
-                        if (caretLocation.Width == 1)
-                        {
-                            WindowManager.ShowWindow(caretLocation, _config.TargetProcesses);
-                        }
-                        if (caretLocation.Width == 0)
+                    if (caretLocation.Width == 1)
+                    {
+                        if (!WindowManager.ShowWindow(caretLocation, _config.TargetProcesses) && WindowManager.Showing)
                         {
                             WindowManager.HideWindow(caretLocation);
                         }
-
-                        Thread.Sleep(10);
                     }
+                    if (caretLocation.Width == 0)
+                    {
+                        WindowManager.HideWindow(caretLocation);
+                    }
+
+                    Thread.Sleep(_config.CaretLocationInterval);
                 }
-            });
-            thread.Start();
+            }
         }
 
         /*private void Hook_KeyboardPressed(object? sender, GlobalKeyboardHookEventArgs e)
@@ -139,11 +144,11 @@ namespace VkStickers
             Grid1.SnapsToDevicePixels = true;
             foreach (string dir in Directory.EnumerateDirectories(StickersDir))
             {
-                _stickerLoader.LoadStickers(dir, tabControl, Btn_Click);
+                _stickerLoader.LoadStickers(dir, tabControl, SendSticker);
             }
         }
 
-        private void Btn_Click(object sender, RoutedEventArgs e)
+        private void SendSticker(object sender, RoutedEventArgs e)
         {
             lock (_locker)
             {
@@ -175,7 +180,7 @@ namespace VkStickers
                     inputSimulator.Keyboard.KeyDown(VirtualKeyCode.CONTROL);
                     inputSimulator.Keyboard.KeyPress(VirtualKeyCode.VK_V);
                     inputSimulator.Keyboard.KeyUp(VirtualKeyCode.CONTROL);
-                    Thread.Sleep(200);
+                    Thread.Sleep(_config.SendEnterWaitTime);
                     inputSimulator.Keyboard.KeyPress(VirtualKeyCode.RETURN);
                 }
                 catch (Exception ex)

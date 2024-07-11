@@ -14,18 +14,17 @@ namespace VkStickers.ExternalProcesses
 {
     internal class WindowManager
     {
-        static bool _show;
         internal static IntPtr LastActiveWindow;
+        internal static bool Showing { get; set; }
 
-        static string[] _allowedProcesses = new string[] { "steamwebhelper", "Discord" };
-        internal static void ShowWindow(CaretLocation caretLocation, TargetProcess[] targetProcesses)
+        internal static bool ShowWindow(CaretLocation caretLocation, TargetProcess[] targetProcesses)
         {
             LastActiveWindow = GetForegroundWindow();
 
             GetWindowThreadProcessId(LastActiveWindow, out int id);
             var process = Process.GetProcessById(id);
-            if (!_allowedProcesses.Contains(process.ProcessName))
-                return;
+            if (!targetProcesses.Any(tp => tp.Name == process.ProcessName))
+                return false;
 
             TargetProcess? targetProcess = targetProcesses.SingleOrDefault(tp => tp.Name == process.ProcessName);
             MainWindow.StickerBackground = null;
@@ -35,11 +34,25 @@ namespace VkStickers.ExternalProcesses
                 MainWindow.StickerBackground = color;
             }
 
+            if (!GetWindowRect(LastActiveWindow, out RECT rect))
+            {
+                Debug.WriteLine("Could not get window rect for: " + LastActiveWindow);
+                return false;
+            }
+            if (rect.Bottom - 200 > caretLocation.Top)
+            {
+                Debug.WriteLine("Caret location is higher than allowed");
+                return false;
+            }
+
             Debug.WriteLine("Show");
             var handle = Process.GetCurrentProcess().MainWindowHandle;
-            SetWindowPos(handle, -1, caretLocation.Left + 600, caretLocation.Top - 470, 0, 0, SWP_ASYNCWINDOWPOS | SWP_NOSIZE | SWP_SHOWWINDOW);
+            var x = rect.Right + targetProcess?.RightOffset ?? 0;
+            var y = rect.Bottom + targetProcess?.BottomOffset ?? 0;
+            SetWindowPos(handle, -1, x, y, 0, 0, SWP_ASYNCWINDOWPOS | SWP_NOSIZE | SWP_SHOWWINDOW);
 
-            _show = caretLocation.Width != 0;
+            Showing = true;
+            return true;
         }
 
         internal static void HideWindow(CaretLocation caretLocation)
@@ -51,7 +64,7 @@ namespace VkStickers.ExternalProcesses
                 Debug.WriteLine("Hide");
                 SetWindowPos(handle, 1, 5000, 3000, 0, 0, SWP_ASYNCWINDOWPOS | SWP_NOSIZE | SWP_SHOWWINDOW);
 
-                _show = caretLocation.Width != 0;
+                Showing = false;
             }
         }
 
