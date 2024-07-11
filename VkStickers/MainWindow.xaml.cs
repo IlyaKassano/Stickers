@@ -26,6 +26,7 @@ using WindowsInput;
 using WindowsInput.Native;
 using static VkStickers.General.WinApi;
 using Rectangle = System.Drawing.Rectangle;
+using System.Windows.Controls.Primitives;
 
 namespace VkStickers
 {
@@ -35,7 +36,6 @@ namespace VkStickers
     public partial class MainWindow : Window
     {
         readonly Config _config;
-        const string ConfigPath = "config.json";
 
         public static Color? StickerBackground = Colors.Transparent;
 
@@ -47,19 +47,13 @@ namespace VkStickers
         {
             InitializeComponent();
 
-            if (!File.Exists(ConfigPath))
-                throw new FileNotFoundException(ConfigPath);
-
-            _config = JsonSerializer.Deserialize<Config>(File.ReadAllText(ConfigPath));
-            if (_config == null)
-                throw new NullReferenceException("Decoded config is null");
-
+            _config = ConfigLoader.GetConfig();
             _stickerLoader = new StickersLoader();
 
             //_hooker = new GlobalKeyboardHook();
             //_hooker.KeyboardPressed += Hook_KeyboardPressed;
 
-            Thread thread = new(StartMonitoringCaret);
+            var thread = new Task(StartMonitoringCaret);
             thread.Start();
         }
 
@@ -131,20 +125,11 @@ namespace VkStickers
         private void Grid_Loaded(object sender, RoutedEventArgs e)
         {
             this.Resources["SelectedItemBackgroundBrush"] = Brushes.Gray;
-            var tabControl = new TabControl()
-            {
-                BorderBrush = Brushes.Transparent,
-                Background = new SolidColorBrush(MyColors.Background),
-            };
-
-            Grid1.Children.Add(tabControl);
-            Grid.SetColumn(tabControl, 0);
-            Grid.SetRow(tabControl, 0);
 
             Grid1.SnapsToDevicePixels = true;
             foreach (string dir in Directory.EnumerateDirectories(StickersDir))
             {
-                _stickerLoader.LoadStickers(dir, tabControl, SendSticker);
+                _stickerLoader.LoadStickers(dir, TabControl1, SendSticker);
             }
         }
 

@@ -5,22 +5,22 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:VkStickers"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800" ResizeMode="NoResize" SizeToContent="Width" WindowStyle="ThreeDBorderWindow" SnapsToDevicePixels="True">
-    <ScrollViewer>
-        <Grid x:Name="Grid1" Loaded="Grid_Loaded" Background="#FF292929">
+        Title="MainWindow" Height="450" Width="800" ResizeMode="NoResize" SizeToContent="Width" WindowStyle="None" SnapsToDevicePixels="True" Loaded="MainWindow1_Loaded">
+    <ScrollViewer VerticalScrollBarVisibility="Hidden">
+        <Grid x:Name="Grid1" Loaded="Grid_Loaded" Background="#FF414141">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
+            <TabControl x:Name="TabControl1" Grid.Column="3" Background="#FF353535" BorderBrush="Transparent"/>
         </Grid>
     </ScrollViewer>
-
     <Window.Resources>
         <SolidColorBrush x:Key="SelectedItemBackgroundBrush"
                      Color="Red" />
-        
+
         <Style TargetType="{x:Type TabItem}">
             <Setter Property="Template">
                 <Setter.Value>
