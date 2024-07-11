@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:VkStickers"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800" ResizeMode="NoResize" SizeToContent="Width" WindowStyle="None" SnapsToDevicePixels="True">
+        Title="Stickers" Height="450" Width="800" ResizeMode="NoResize" SizeToContent="Width" WindowStyle="None" SnapsToDevicePixels="True">
     <ScrollViewer VerticalScrollBarVisibility="Hidden">
         <Grid x:Name="Grid1" Loaded="Grid_Loaded" Background="#FF414141">
             <Grid.ColumnDefinitions>

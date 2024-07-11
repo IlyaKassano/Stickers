@@ -10,14 +10,14 @@ namespace VkStickers.General
 {
     internal class ConfigLoader
     {
-        const string ConfigPath = "config.json";
+        readonly static string _configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.json");
 
         internal static Config GetConfig()
         {
-            if (!File.Exists(ConfigPath))
-                throw new FileNotFoundException(ConfigPath);
+            if (!File.Exists(_configPath))
+                throw new FileNotFoundException(_configPath);
 
-            Config config = JsonSerializer.Deserialize<Config>(File.ReadAllText(ConfigPath)) 
+            Config config = JsonSerializer.Deserialize<Config>(File.ReadAllText(_configPath)) 
                 ?? throw new NullReferenceException("Decoded config is null");
 
             return config;
