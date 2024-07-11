@@ -10,20 +10,20 @@ using System.Windows.Media;
 using System.Windows;
 using WindowsInput.Native;
 using WindowsInput;
-using static VkStickers.WinApi;
 using System.Windows.Input;
 using System.Windows.Controls.Primitives;
+using VkStickers.General;
 
-namespace VkStickers
+namespace VkStickers.StickerManagers
 {
     internal class StickersLoader
     {
-        internal StickersLoader(Grid grid)
+        internal StickersLoader()
         {
-            _grid = grid;
         }
 
-        internal void LoadStickers(string folder, TabControl tabControl, RoutedEventHandler stickerClickHandler) {
+        internal void LoadStickers(string folder, TabControl tabControl, RoutedEventHandler stickerClickHandler)
+        {
             int col = 0;
             int row = 0;
 
@@ -99,7 +99,7 @@ namespace VkStickers
             {
                 var image = new Image()
                 {
-                    Source = new BitmapImage(new Uri(System.IO.Path.GetFullPath(path))),
+                    Source = new BitmapImage(new Uri(Path.GetFullPath(path))),
                     MaxWidth = 100,
                     MaxHeight = 100,
                     SnapsToDevicePixels = true,

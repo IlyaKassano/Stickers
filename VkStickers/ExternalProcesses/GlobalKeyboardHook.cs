@@ -7,9 +7,10 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Interop;
-using static VkStickers.WinApi;
+using VkStickers.General;
+using static VkStickers.General.WinApi;
 
-namespace VkStickers
+namespace VkStickers.ExternalProcesses
 {
     class GlobalKeyboardHookEventArgs : HandledEventArgs
     {

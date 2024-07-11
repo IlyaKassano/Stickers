@@ -6,9 +6,11 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
-using static VkStickers.WinApi;
+using System.Windows.Media;
+using VkStickers.General;
+using static VkStickers.General.WinApi;
 
-namespace VkStickers
+namespace VkStickers.ExternalProcesses
 {
     internal class WindowManager
     {
@@ -16,7 +18,7 @@ namespace VkStickers
         internal static IntPtr LastActiveWindow;
 
         static string[] _allowedProcesses = new string[] { "steamwebhelper", "Discord" };
-        internal static void ShowWindow(CaretLocation caretLocation)
+        internal static void ShowWindow(CaretLocation caretLocation, TargetProcess[] targetProcesses)
         {
             LastActiveWindow = GetForegroundWindow();
 
@@ -24,6 +26,14 @@ namespace VkStickers
             var process = Process.GetProcessById(id);
             if (!_allowedProcesses.Contains(process.ProcessName))
                 return;
+
+            TargetProcess? targetProcess = targetProcesses.SingleOrDefault(tp => tp.Name == process.ProcessName);
+            MainWindow.StickerBackground = null;
+            if (targetProcess?.BackgroundColor != null)
+            {
+                var color = (Color)ColorConverter.ConvertFromString(targetProcess.BackgroundColor);
+                MainWindow.StickerBackground = color;
+            }
 
             Debug.WriteLine("Show");
             var handle = Process.GetCurrentProcess().MainWindowHandle;

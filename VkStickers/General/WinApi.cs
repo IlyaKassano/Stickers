@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace VkStickers
+namespace VkStickers.General
 {
     public class WinApi
     {
@@ -191,5 +191,29 @@ namespace VkStickers
         KeyUp = 0x0101,
         SysKeyDown = 0x0104,
         SysKeyUp = 0x0105
+    }
+
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct RECT
+    {
+        public int iLeft;
+        public int iTop;
+        public int iRight;
+        public int iBottom;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct GUITHREADINFO
+    {
+        public int cbSize;
+        public int flags;
+        public IntPtr hwndActive;
+        public IntPtr hwndFocus;
+        public IntPtr hwndCapture;
+        public IntPtr hwndMenuOwner;
+        public IntPtr hwndMoveSize;
+        public IntPtr hwndCaret;
+        public RECT rectCaret;
     }
 }

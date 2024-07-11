@@ -7,6 +7,7 @@ using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
 using System.Security.AccessControl;
 using System.Text;
+using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -18,9 +19,12 @@ using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using VkStickers.General;
+using VkStickers.ExternalProcesses;
+using VkStickers.StickerManagers;
 using WindowsInput;
 using WindowsInput.Native;
-using static VkStickers.WinApi;
+using static VkStickers.General.WinApi;
 using Rectangle = System.Drawing.Rectangle;
 
 namespace VkStickers
@@ -30,7 +34,12 @@ namespace VkStickers
     /// </summary>
     public partial class MainWindow : Window
     {
-        const string StickersDir = "Stickers";
+        readonly Config? _config;
+        const string ConfigPath = "config.json";
+
+        public static Color? StickerBackground = Colors.Transparent;
+
+        string StickersDir = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Stickers");
         object _locker = new object();
         StickersLoader _stickerLoader;
 
@@ -38,7 +47,14 @@ namespace VkStickers
         {
             InitializeComponent();
 
-            _stickerLoader = new StickersLoader(Grid1);
+            if (!File.Exists(ConfigPath))
+                throw new FileNotFoundException(ConfigPath);
+
+            _config = JsonSerializer.Deserialize<Config>(File.ReadAllText(ConfigPath));
+            if (_config == null)
+                throw new NullReferenceException("Decoded config is null");
+
+            _stickerLoader = new StickersLoader();
 
             //_hooker = new GlobalKeyboardHook();
             //_hooker.KeyboardPressed += Hook_KeyboardPressed;
@@ -49,13 +65,22 @@ namespace VkStickers
                 {
                     lock (_locker)
                     {
-                        var caretLocation = CaretLocator.Locate();
+                        CaretLocation? caretLocation = null;
+                        try
+                        {
+                            caretLocation = CaretLocator.Locate();
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine(ex);
+                        }
+
                         if (caretLocation == null)
                             continue;
 
                         if (caretLocation.Width == 1)
                         {
-                            WindowManager.ShowWindow(caretLocation);
+                            WindowManager.ShowWindow(caretLocation, _config.TargetProcesses);
                         }
                         if (caretLocation.Width == 0)
                         {
@@ -106,27 +131,6 @@ namespace VkStickers
                 BorderBrush = Brushes.Transparent,
                 Background = new SolidColorBrush(MyColors.Background),
             };
-            /*tabControl.SelectionChanged += (sender2, args) =>
-            {
-                if (args.AddedItems != null && args.AddedItems.Count > 0)
-                {
-                    TabItem ti = args.AddedItems[0] as TabItem;
-                    if (ti != null && VisualTreeHelper.GetChildrenCount(ti) > 0)
-                    {
-                        Grid grid = VisualTreeHelper.GetChild(ti, 0) as Grid;
-                        if (grid != null)
-                        {
-                            Border mainBorder = grid.Children[0] as Border;
-                            if (mainBorder != null)
-                            {
-                                Border innerBorder = mainBorder.Child as Border;
-                                if (innerBorder != null)
-                                    innerBorder.Background = Brushes.Red;
-                            }
-                        }
-                    }
-                }
-            };*/
 
             Grid1.Children.Add(tabControl);
             Grid.SetColumn(tabControl, 0);
@@ -147,8 +151,20 @@ namespace VkStickers
                 var stackPnl = (StackPanel)btn.Content;
                 var img = (Image)stackPnl.Children[0];
 
-                var src = ((BitmapSource)img.Source).ReplaceTransparency(Color.FromRgb(0x1d, 0x1f, 0x24)); // TODO Pick color
-                Clipboard.SetImage(src);
+                if (StickerBackground == null)
+                {
+                    var paths = new StringCollection
+                    {
+                        ((BitmapImage)img.Source).UriSource.AbsolutePath
+                    };
+
+                    Clipboard.SetFileDropList(paths);
+                }
+                else
+                {
+                    var src = ((BitmapSource)img.Source).ReplaceTransparency((Color)StickerBackground); // TODO Pick color
+                    Clipboard.SetImage(src);
+                }
 
                 SetForegroundWindow(WindowManager.LastActiveWindow);
                 SetActiveWindow(WindowManager.LastActiveWindow);

@@ -1,0 +1,11 @@
+{
+  "TargetProcesses": [
+    {
+      "Name": "steamwebhelper",
+      "BackgroundColor": "#1d1f24"
+    },
+    {
+      "Name": "Discord"
+    }
+  ]
+}

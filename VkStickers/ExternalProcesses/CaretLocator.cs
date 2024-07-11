@@ -7,11 +7,13 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
-using static VkStickers.WinApi;
+using VkStickers.General;
+using static VkStickers.General.WinApi;
 
-namespace VkStickers
+namespace VkStickers.ExternalProcesses
 {
-    public class CaretLocation {
+    public class CaretLocation
+    {
         public int Left { get; set; }
         public int Top { get; set; }
         public int Width { get; set; }
@@ -24,7 +26,8 @@ namespace VkStickers
 
         static ConcurrentDictionary<IntPtr, object> _accessibleObjects = new ConcurrentDictionary<IntPtr, object>();
 
-        public static CaretLocation? Locate() {
+        public static CaretLocation? Locate()
+        {
             var guiInfo = new GUITHREADINFO();
             guiInfo.cbSize = Marshal.SizeOf(guiInfo);
             GetGUIThreadInfo(0, ref guiInfo);
@@ -55,28 +58,5 @@ namespace VkStickers
                 Height = pcyHeight,
             };
         }
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    public struct RECT
-    {
-        public int iLeft;
-        public int iTop;
-        public int iRight;
-        public int iBottom;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    public struct GUITHREADINFO
-    {
-        public int cbSize;
-        public int flags;
-        public IntPtr hwndActive;
-        public IntPtr hwndFocus;
-        public IntPtr hwndCapture;
-        public IntPtr hwndMenuOwner;
-        public IntPtr hwndMoveSize;
-        public IntPtr hwndCaret;
-        public RECT rectCaret;
     }
 }
