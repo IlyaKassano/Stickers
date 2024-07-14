@@ -12,9 +12,9 @@ using WindowsInput.Native;
 using WindowsInput;
 using System.Windows.Input;
 using System.Windows.Controls.Primitives;
-using VkStickers.General;
+using Stickers.General;
 
-namespace VkStickers.StickerManagers
+namespace Stickers.StickerManagers
 {
     internal class StickersLoader
     {

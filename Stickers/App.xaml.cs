@@ -2,6 +2,6 @@
 using System.Data;
 using System.Windows;
 
-namespace VkStickers
+namespace Stickers
 {
 }

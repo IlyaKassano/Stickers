@@ -8,11 +8,11 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
-namespace VkStickers.StickerManagers
+namespace Stickers.StickerManagers
 {
-    internal static class PngModifier
+    internal static class ImageModifier
     {
-        public static BitmapSource ReplaceTransparency(this BitmapSource bitmap, System.Windows.Media.Color color)
+        public static BitmapSource ReplaceTransparency(BitmapSource bitmap, System.Windows.Media.Color color)
         {
             var rect = new Rect(0, 0, bitmap.PixelWidth, bitmap.PixelHeight);
             var visual = new DrawingVisual();

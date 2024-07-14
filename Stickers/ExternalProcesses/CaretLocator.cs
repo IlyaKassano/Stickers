@@ -7,10 +7,10 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
-using VkStickers.General;
-using static VkStickers.General.WinApi;
+using Stickers.General;
+using static Stickers.General.WinApi;
 
-namespace VkStickers.ExternalProcesses
+namespace Stickers.ExternalProcesses
 {
     public class CaretLocation
     {

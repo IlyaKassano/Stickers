@@ -19,16 +19,16 @@ using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using VkStickers.General;
-using VkStickers.ExternalProcesses;
-using VkStickers.StickerManagers;
+using Stickers.General;
+using Stickers.ExternalProcesses;
+using Stickers.StickerManagers;
 using WindowsInput;
 using WindowsInput.Native;
-using static VkStickers.General.WinApi;
+using static Stickers.General.WinApi;
 using Rectangle = System.Drawing.Rectangle;
 using System.Windows.Controls.Primitives;
 
-namespace VkStickers
+namespace Stickers
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -141,7 +141,8 @@ namespace VkStickers
                 var stackPnl = (StackPanel)btn.Content;
                 var img = (Image)stackPnl.Children[0];
 
-                if (StickerBackground == null)
+                var path = ((BitmapImage)img.Source).UriSource.AbsolutePath;
+                if (StickerBackground == null || System.IO.Path.GetExtension(path).Equals(".gif", StringComparison.OrdinalIgnoreCase))
                 {
                     var paths = new StringCollection
                     {
@@ -152,7 +153,7 @@ namespace VkStickers
                 }
                 else
                 {
-                    var src = ((BitmapSource)img.Source).ReplaceTransparency((Color)StickerBackground); // TODO Pick color
+                    var src = ImageModifier.ReplaceTransparency((BitmapSource)img.Source, (Color)StickerBackground);
                     Clipboard.SetImage(src);
                 }
 
