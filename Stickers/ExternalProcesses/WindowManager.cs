@@ -36,16 +36,16 @@ namespace Stickers.ExternalProcesses
 
             if (!GetWindowRect(LastActiveWindow, out RECT rect))
             {
-                Debug.WriteLine("Could not get window rect for: " + LastActiveWindow);
+                Trace.WriteLine("Could not get window rect for: " + LastActiveWindow);
                 return false;
             }
             if (rect.Bottom - 200 > caretLocation.Top)
             {
-                Debug.WriteLine("Caret location is higher than allowed");
+                Trace.WriteLine("Caret location is higher than allowed");
                 return false;
             }
 
-            Debug.WriteLine("Show");
+            Trace.WriteLine("Show");
             var handle = Process.GetCurrentProcess().MainWindowHandle;
             var x = rect.Right + targetProcess?.RightOffset ?? 0;
             var y = rect.Bottom + targetProcess?.BottomOffset ?? 0;
@@ -61,7 +61,7 @@ namespace Stickers.ExternalProcesses
             var fore = GetForegroundWindow();
             if (handle != fore)
             {
-                Debug.WriteLine("Hide");
+                Trace.WriteLine("Hide");
                 SetWindowPos(handle, 1, 5000, 3000, 0, 0, SWP_ASYNCWINDOWPOS | SWP_NOSIZE | SWP_SHOWWINDOW);
 
                 Showing = false;

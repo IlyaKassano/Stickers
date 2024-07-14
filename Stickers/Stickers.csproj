@@ -9,6 +9,10 @@
     <ApplicationIcon>Internal\Icon\Stickers32.ico</ApplicationIcon>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <Optimize>False</Optimize>
+  </PropertyGroup>
+
   <ItemGroup>
     <Content Include="Internal\Icon\Stickers32.ico" />
   </ItemGroup>

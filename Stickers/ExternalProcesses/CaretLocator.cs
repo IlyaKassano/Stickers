@@ -48,7 +48,7 @@ namespace Stickers.ExternalProcesses
             }
 
             ao.accLocation(out int pxLeft, out int pyTop, out int pcxWidth, out int pcyHeight, 0);
-            Debug.WriteLine("{0}, {1}, {2}, {3}", pxLeft, pyTop, pcxWidth, pcyHeight);
+            Trace.WriteLine(string.Format("{0}, {1}, {2}, {3}", pxLeft, pyTop, pcxWidth, pcyHeight));
 
             return new CaretLocation()
             {

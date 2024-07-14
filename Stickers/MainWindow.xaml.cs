@@ -70,7 +70,7 @@ namespace Stickers
                     }
                     catch (Exception ex)
                     {
-                        Debug.WriteLine(ex);
+                        Trace.WriteLine(ex);
                     }
 
                     if (caretLocation == null)
@@ -95,10 +95,10 @@ namespace Stickers
 
         /*private void Hook_KeyboardPressed(object? sender, GlobalKeyboardHookEventArgs e)
         {
-            Debug.WriteLine(e.KeyboardData.VirtualCode);
+            Trace.WriteLine(e.KeyboardData.VirtualCode);
             var point = new Point();
-            Debug.WriteLine(GetCaretPos(out point));
-            Debug.WriteLine("{0}, {1}", point.X, point.Y);
+            Trace.WriteLine(GetCaretPos(out point));
+            Trace.WriteLine("{0}, {1}", point.X, point.Y);
 
 
             if (e.KeyboardData.VirtualCode != 97)
