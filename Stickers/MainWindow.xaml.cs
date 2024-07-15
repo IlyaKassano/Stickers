@@ -164,6 +164,7 @@ namespace Stickers
                 try
                 {
                     inputSimulator.Keyboard.KeyDown(VirtualKeyCode.CONTROL);
+                    Thread.Sleep(_config.SendCtrlWaitTime);
                     inputSimulator.Keyboard.KeyPress(VirtualKeyCode.VK_V);
                     inputSimulator.Keyboard.KeyUp(VirtualKeyCode.CONTROL);
                     Thread.Sleep(_config.SendEnterWaitTime);

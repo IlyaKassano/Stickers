@@ -13,6 +13,7 @@ namespace Stickers.General
         public TargetProcess[] TargetProcesses { get; set; }
         public int MaxHeightForCaretLocation { get; set; } = 100;
         public int SendEnterWaitTime { get; set; } = 200;
+        public int SendCtrlWaitTime { get; set; } = 50;
         public int CaretLocationInterval { get; set; } = 10;
     }
 
